@@ -1,26 +1,40 @@
-version: "2"
+version: "2.3"
 services:
   nginx:
       build:
           context: ./nginx
       ports:
           - "8080:80"
+      restart: always
       volumes:
           - ./app:/var/app
+      links:
+          - fpm
   fpm:
       build:
           context: ./fpm
       volumes:
           - ./app:/var/app
+      restart: always
       expose:
           - "9000"
+      links:
+          - db
       environment:
           - "DB_HOST=db"
-          - "DB_DATABASE=laravel"
+          - "DB_DATABASE=wawi"
   db:
       image: mariadb
+      restart: always
       environment:
-          - MYSQL_ROOT_PASSWORD=root
-          - MYSQL_DATABASE=laravel
+          - MYSQL_ROOT_PASSWORD=sqladmin
+          - MYSQL_DATABASE=wawi
       volumes:
           - ./database:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db:db
+    ports:
+      - 8181:80
